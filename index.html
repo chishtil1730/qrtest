@@ -1,19 +1,219 @@
 <!DOCTYPE html>
 <html>
-    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
-    <!-- we import arjs version without NFT but with marker + location based support -->
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    <body style="margin : 0px; overflow: hidden;">
-        <a-scene embedded arjs>
-        <a-marker preset="hiro">
-            <!-- we use cors proxy to avoid cross-origin problems ATTENTION! you need to set up your server -->
-            <a-entity
-            position="0 0 0"
-            scale="0.05 0.05 0.05"
-            gltf-model="your-server/https://raw.githack.com/AR-js-org/AR.js/master/aframe/examples/image-tracking/nft/trex/scene.gltf"
-            ></a-entity>
+<head>
+    <meta charset="utf-8">
+    <title>AR Image Display</title>
+    <meta name="description" content="AR Image Display with QR Code">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aframe/1.4.0/aframe.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ar.js/2.2.2/aframe-ar.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+        
+        #instructions {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            z-index: 999;
+            text-align: center;
+            font-size: 14px;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        
+        #loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 1000;
+            text-align: center;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading">
+        <h3>Loading AR Camera...</h3>
+        <p>Please allow camera access when prompted</p>
+    </div>
+
+    <div id="instructions">
+        <button class="close-btn" onclick="closeInstructions()">×</button>
+        <h3>AR Image Display</h3>
+        <p>Point your camera at any QR code or barcode to see the AR image!</p>
+        <p>Try scanning a QR code from another device or printed QR code.</p>
+    </div>
+
+    <a-scene
+        vr-mode-ui="enabled: false"
+        arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
+        renderer="logarithmicDepthBuffer: true;"
+        embedded
+        gesture-detector>
+        
+        <a-assets>
+            <!-- Sample image - replace with your own -->
+            <img id="ar-image" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjNDMzOENBIi8+Cjx0ZXh0IHg9IjIwMCIgeT0iMTUwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iMC4zZW0iPllvdXIgQVIgSW1hZ2UgSGVyZSE8L3RleHQ+Cjx0ZXh0IHg9IjIwMCIgeT0iMTkwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTYiIGZpbGw9IiNGRkZGRkYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIwLjNlbSI+UmVwbGFjZSB3aXRoIHlvdXIgb3duIGltYWdlPC90ZXh0Pgo8Y2lyY2xlIGN4PSIxMDAiIGN5PSIxMDAiIHI9IjMwIiBmaWxsPSIjRkY2QjM1Ii8+CjxjaXJjbGUgY3g9IjMwMCIgY3k9IjEwMCIgcj0iMzAiIGZpbGw9IiNGRjZCMzUiLz4KPGNpcmNsZSBjeD0iMTAwIiBjeT0iMjAwIiByPSIzMCIgZmlsbD0iI0ZGNkIzNSIvPgo8Y2lyY2xlIGN4PSIzMDAiIGN5PSIyMDAiIHI9IjMwIiBmaWxsPSIjRkY2QjM1Ii8+Cjwvc3ZnPgo=" crossorigin="anonymous">
+        </a-assets>
+
+        <!-- Multiple marker types for better detection -->
+        <a-marker type="barcode" value="0">
+            <a-plane
+                position="0 0 0"
+                rotation="-90 0 0"
+                width="2"
+                height="1.5"
+                src="#ar-image"
+                animation="property: rotation; to: -90 360 0; loop: true; dur: 10000">
+            </a-plane>
+            
+            <a-text
+                value="Barcode 0 Detected!"
+                position="0 1 0"
+                rotation="-90 0 0"
+                color="#FF6B35"
+                align="center">
+            </a-text>
         </a-marker>
+
+        <a-marker type="barcode" value="1">
+            <a-plane
+                position="0 0 0"
+                rotation="-90 0 0"
+                width="2"
+                height="1.5"
+                src="#ar-image"
+                animation="property: rotation; to: -90 360 0; loop: true; dur: 8000">
+            </a-plane>
+            
+            <a-text
+                value="Barcode 1 Detected!"
+                position="0 1 0"
+                rotation="-90 0 0"
+                color="#35FF6B"
+                align="center">
+            </a-text>
+        </a-marker>
+
+        <a-marker type="barcode" value="2">
+            <a-plane
+                position="0 0 0"
+                rotation="-90 0 0"
+                width="2"
+                height="1.5"
+                src="#ar-image"
+                animation="property: rotation; to: -90 360 0; loop: true; dur: 6000">
+            </a-plane>
+            
+            <a-text
+                value="Barcode 2 Detected!"
+                position="0 1 0"
+                rotation="-90 0 0"
+                color="#6B35FF"
+                align="center">
+            </a-text>
+        </a-marker>
+
+        <!-- Pattern marker for Hiro pattern -->
+        <a-marker preset="hiro">
+            <a-plane
+                position="0 0 0"
+                rotation="-90 0 0"
+                width="2"
+                height="1.5"
+                src="#ar-image"
+                animation="property: rotation; to: -90 360 0; loop: true; dur: 12000">
+            </a-plane>
+            
+            <a-text
+                value="Hiro Pattern Detected!"
+                position="0 1 0"
+                rotation="-90 0 0"
+                color="#FF3535"
+                align="center">
+            </a-text>
+        </a-marker>
+
         <a-entity camera></a-entity>
-        </a-scene>
-    </body>
+    </a-scene>
+
+    <script>
+        function closeInstructions() {
+            document.getElementById('instructions').style.display = 'none';
+        }
+        
+        // Hide loading screen when AR is ready
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                document.getElementById('loading').classList.add('hidden');
+            }, 2000);
+        });
+        
+        // Handle AR.js events
+        document.addEventListener('DOMContentLoaded', function() {
+            const markers = document.querySelectorAll('a-marker');
+            
+            markers.forEach(marker => {
+                marker.addEventListener('markerFound', function() {
+                    console.log('Marker found:', marker.getAttribute('type'));
+                    document.getElementById('instructions').innerHTML = 
+                        '<button class="close-btn" onclick="closeInstructions()">×</button>' +
+                        '<h3>AR Active! 🎉</h3>' +
+                        '<p>AR image is now visible! Move your device around to see it from different angles.</p>';
+                });
+                
+                marker.addEventListener('markerLost', function() {
+                    console.log('Marker lost');
+                    document.getElementById('instructions').innerHTML = 
+                        '<button class="close-btn" onclick="closeInstructions()">×</button>' +
+                        '<h3>AR Image Display</h3>' +
+                        '<p>Point your camera at any QR code or barcode to see the AR image!</p>' +
+                        '<p>Try scanning a QR code from another device or printed QR code.</p>';
+                });
+            });
+        });
+        
+        // Debug camera issues
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function(stream) {
+                console.log('Camera access granted');
+                stream.getTracks().forEach(track => track.stop());
+            })
+            .catch(function(error) {
+                console.error('Camera access denied:', error);
+                document.getElementById('loading').innerHTML = 
+                    '<h3>Camera Access Required</h3>' +
+                    '<p>Please allow camera access and refresh the page</p>' +
+                    '<button onclick="location.reload()">Refresh</button>';
+            });
+    </script>
+</body>
 </html>
